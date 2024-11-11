@@ -1,32 +1,6 @@
 /*
  PRÁCTICA 1
  Realiza las siguientes consultas en SQL.
- 28. ¿Qué comercios distribuyen Windows?
- 29. Genera un listado de los programas y cantidades que se han distribuido a El
- Corte Inglés de Madrid.
- 30. ¿Qué fabricante ha desarrollado Freddy Hardest?
- 31. Selecciona el nombre de los programas que se registran por Internet.
- 32. Selecciona el nombre de las personas que se registran por Internet.
- 33. ¿Qué medios ha utilizado para registrarse Pepe Pérez?
- 34. ¿Qué usuarios han optado por Internet como medio de registro?
- 35. ¿Qué programas han recibido registros por tarjeta postal?
- 36. ¿En qué localidades se han vendido productos que se han registrado por
- Internet?
- 37. Obtén un listado de los nombres de las personas que se han registrado por
- Internet, junto al nombre de los programas para los que ha efectuado el
- registro.
- 38. Genera un listado en el que aparezca cada cliente junto al programa que ha
- registrado, el medio con el que lo ha hecho y el comercio en el que lo ha
- adquirido.
- 39. Genera un listado con las ciudades en las que se pueden obtener los
- productos de Oracle.
- 40. Obtén el nombre de los usuarios que han registrado Access XP.
- 41. Nombre de aquellos fabricantes cuyo país es el mismo que ʻOracleʼ.
- (Subconsulta).
- 42. Nombre de aquellos clientes que tienen la misma edad que Pepe Pérez.
- (Subconsulta).
- 43. Genera un listado con los comercios que tienen su sede en la misma ciudad
- que tiene el comercio ʻFNACʼ. (Subconsulta).
 */
 --  1. Averigua el DNI de todos los clientes.
 SELECT * FROM cliente;
@@ -123,3 +97,159 @@ select * from programa order by version;
 select fabricante.nombre, programa.nombre
 from fabricante, programa, desarrolla
 where fabricante.id_fab = desarrolla.id_fab and desarrolla.codigo=programa.codigo and fabricante.nombre = 'Oracle';
+
+-- 28. ¿Qué comercios distribuyen Windows?
+
+select programa.codigo, programa.nombre, distribuye.cif, comercio.nombre
+-- JOIN CON INNER JOIN
+from programa inner join distribuye
+on programa.codigo = distribuye.codigo
+inner join comercio
+on comercio.cif = distribuye.cif
+where programa.nombre = 'Windows';
+
+-- INNER JOIN CON WHERE / JOIN CON WHERE
+select comercio.nombre from programa, distribuye, comercio
+where programa.codigo = distribuye.codigo and comercio.cif = distribuye.cif and programa.nombre = 'Windows';
+
+-- 29. Genera un listado de los programas y cantidades que se han distribuido a El Corte Inglés de Madrid.
+select comercio.nombre, programa.nombre, distribuye.cantidad, comercio.ciudad
+from programa, comercio, distribuye
+where programa.codigo = distribuye.codigo and distribuye.cif = comercio.cif and comercio.nombre = 'El corte Inglés' and comercio.ciudad = 'Madrid';
+
+-- 30. ¿Qué fabricante ha desarrollado Freddy Hardest?
+select fabricante.nombre, programa.nombre
+from fabricante, programa, desarrolla
+where programa.codigo = desarrolla.codigo and desarrolla.id_fab = fabricante.id_fab and programa.nombre = 'Freddy Hardest';
+
+-- 31. Selecciona el nombre de los programas que se registran por Internet.
+select programa.nombre, registra.medio
+from programa, registra
+where programa.codigo = registra.codigo and registra.medio = 'Internet';
+
+-- 32. Selecciona el nombre de las personas que se registran por Internet.
+select cliente.nombre, registra.medio
+from cliente, registra
+where registra.dni = cliente.dni and registra.medio = 'Internet';
+
+-- 33. ¿Qué medios ha utilizado para registrarse Pepe Pérez?
+select cliente.nombre, registra.medio
+from cliente, registra
+where registra.dni = cliente.dni and cliente.nombre = 'Pepe Pérez';
+
+-- 34. ¿Qué usuarios han optado por Internet como medio de registro?
+select cliente.nombre, registra.medio
+from cliente, registra
+where registra.dni = cliente.dni and registra.medio = 'Internet';
+
+-- 35. ¿Qué programas han recibido registros por tarjeta postal?
+select programa.nombre, registra.medio
+from programa, registra
+where programa.codigo = registra.codigo and registra.medio = 'Tarjeta postal';
+
+-- 36. ¿En qué localidades se han vendido productos que se han registrado por Internet?
+select programa.nombre, comercio.ciudad, registra.medio
+from programa, comercio, registra
+where programa.codigo = registra.codigo and registra.cif = comercio.cif and registra.medio = 'Internet';
+
+-- 37. Obtén un listado de los nombres de las personas que se han registrado por 
+-- Internet, junto al nombre de los programas para los que ha efectuado el registro.
+select cliente.nombre, programa.nombre, registra.medio
+from cliente, registra, programa
+where registra.dni = cliente.dni and programa.codigo = registra.codigo and registra.medio = 'Internet';
+
+-- 38. Genera un listado en el que aparezca cada cliente junto al programa que ha 
+-- registrado, el medio con el que lo ha hecho y el comercio en el que lo ha adquirido.
+select cliente.nombre, programa.nombre, registra.medio, comercio.nombre
+from cliente, programa, registra, comercio
+where registra.dni=cliente.dni and programa.codigo=registra.codigo and comercio.cif=registra.cif;
+
+-- 39. Genera un listado con las ciudades en las que se pueden obtener los productos de Oracle.
+select distinct comercio.ciudad
+from fabricante, comercio, distribuye, desarrolla
+where fabricante.id_fab=desarrolla.id_fab and desarrolla.codigo=distribuye.codigo and distribuye.cif=comercio.cif and fabricante.nombre = 'Oracle';
+
+-- 40. Obtén el nombre de los usuarios que han registrado Access XP.
+select cliente.nombre
+from cliente inner join programa inner join registra
+on cliente.dni=registra.dni and registra.codigo=programa.codigo
+where programa.nombre = 'Access' and programa.version = 'XP';
+
+-- 41. Nombre de aquellos fabricantes cuyo país es el mismo que ʻOracleʼ. (Subconsulta).
+select nombre from fabricante
+where pais = (select pais from fabricante where nombre = 'Oracle');
+
+-- 42. Nombre de aquellos clientes que tienen la misma edad que Pepe Pérez. (Subconsulta).
+select * from cliente
+where edad = (select edad from cliente where nombre = 'Pepe Pérez');
+
+-- 43. Genera un listado con los comercios que tienen su sede en la misma ciudad que tiene el comercio ʻFNACʼ. (Subconsulta).
+select * from comercio 
+where ciudad in (select ciudad from comercio where nombre = 'FNAC');
+
+-- 44. Nombre de aquellos clientes que han registrado un producto de la misma forma que el cliente ʻPepe Pérezʼ. (Subconsulta).
+select nombre from cliente, registra 
+where cliente.dni=registra.dni and medio in (select medio from registra, cliente where registra.dni=cliente.dni and cliente.nombre ='Pepe Pérez');
+
+-- 45. Obtener el número de programas que hay en la tabla programas.
+select count(*) as numero_programas from programa;
+
+-- 46. Calcula el número de clientes cuya edad es mayor de 40 años.
+select count(*) from cliente where edad > 40;
+
+-- 47. Calcula el número de productos que ha vendido el establecimiento cuyo CIF es 1.
+select cif, sum(cantidad)
+from distribuye
+where cif = 1
+group by cif;
+
+-- 48. Calcula la media de programas que se venden cuyo código es 7.
+select codigo, avg(cantidad)
+from distribuye
+where codigo = 7
+group by codigo;
+
+-- 49. Calcula la mínima cantidad de programas de código 7 que se ha vendido
+select min(cantidad) 
+from distribuye 
+where codigo = 7;
+
+-- 50. Calcula la máxima cantidad de programas de código 7 que se ha vendido.
+select max(cantidad) 
+from distribuye 
+where codigo = 7;
+
+-- 51. ¿En cuántos establecimientos se vende el programa cuyo código es 7?
+select count(comercio.nombre)
+from distribuye, comercio
+where comercio.cif=distribuye.cif and codigo = 7;
+
+-- 52. Calcular el número de registros que se han realizado por Internet.
+select count(registra.medio)
+from registra
+where medio= 'Internet';
+
+-- 53. Obtener el número total de programas que se han vendido en ʻSevillaʼ.
+select comercio.ciudad, count(distribuye.cantidad)
+from comercio, distribuye
+where comercio.cif = distribuye.cif and comercio.ciudad='Sevilla';
+
+-- 54. Calcular el número total de programas que han desarrollado los fabricantes cuyo país es ʻEstados Unidosʼ.
+select count(*) 
+from fabricante, desarrolla
+where fabricante.id_fab=desarrolla.id_fab and fabricante.pais='Estados Unidos';
+
+-- 55. Visualiza el nombre de todos los clientes en mayúscula. En el resultado de la
+-- consulta debe aparecer también la longitud de la cadena nombre.
+select upper(nombre) as nombre_mayuscula, length(nombre) as caracteres from cliente;
+
+-- 56. Con una consulta concatena los campos nombre y versión de la tabla PROGRAMA.
+select concat(nombre,', versión: ',version) as nombre_version from programa;
+
+select * from comercio;
+select * from distribuye;
+select *from registra;
+select * from cliente;
+select * from fabricante;
+select * from programa;
+select * from desarrolla;
